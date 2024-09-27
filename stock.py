@@ -525,7 +525,7 @@ def interfaz_principal():
         
         repuestos = ver_stock(hospital_id, maquina_id)
         for repuesto in repuestos:
-            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[5]} | Stock: {repuesto[2]}")
+            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[3]} | Stock: {repuesto[2]}")
 
     elif opcion == "Agregar Hospital":
         st.header("Agregar Hospital")
