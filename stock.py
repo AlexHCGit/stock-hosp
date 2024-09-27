@@ -68,7 +68,7 @@ def crear_tablas():
 def verificar_hospital(nombre, ubicacion):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('SELECT COUNT(*) FROM hospital WHERE nombre = ? AND ubicacion = ?', (nombre, ubicacion))
+    cursor.execute('SELECT COUNT(*) FROM hospital WHERE nombre = %s AND ubicacion = %s', (nombre, ubicacion))
     resultado = cursor.fetchone()[0]
     conexion.close()
     return resultado > 0
@@ -77,7 +77,7 @@ def verificar_hospital(nombre, ubicacion):
 def verificar_maquina(nombre, hospital_id):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('SELECT COUNT(*) FROM maquina WHERE nombre = ? AND hospital_id = ?', (nombre, hospital_id))
+    cursor.execute('SELECT COUNT(*) FROM maquina WHERE nombre = %s AND hospital_id = %s', (nombre, hospital_id))
     resultado = cursor.fetchone()[0]
     conexion.close()
     return resultado > 0
@@ -89,7 +89,7 @@ def agregar_hospital(nombre, ubicacion):
     else:
         conexion = conectar_db()
         cursor = conexion.cursor()
-        cursor.execute('INSERT INTO hospital (nombre, ubicacion) VALUES (?, ?)', (nombre, ubicacion))
+        cursor.execute('INSERT INTO hospital (nombre, ubicacion) VALUES (%s, %s)', (nombre, ubicacion))
         conexion.commit()
         conexion.close()
         st.success(f"Hospital '{nombre}' agregado correctamente en la ubicación '{ubicacion}'.")
@@ -101,7 +101,7 @@ def agregar_maquina(nombre, hospital_id):
     else:
         conexion = conectar_db()
         cursor = conexion.cursor()
-        cursor.execute('INSERT INTO maquina (nombre, hospital_id) VALUES (?, ?)', (nombre, hospital_id))
+        cursor.execute('INSERT INTO maquina (nombre, hospital_id) VALUES (%s, %s)', (nombre, hospital_id))
         conexion.commit()
         conexion.close()
         st.success(f"Máquina '{nombre}' agregada correctamente.")
@@ -110,7 +110,7 @@ def agregar_maquina(nombre, hospital_id):
 def agregar_repuesto(nombre, descripcion, ubicacion, stock, maquina_id):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('INSERT INTO repuesto (nombre, descripcion, ubicacion, stock, maquina_id) VALUES (?, ?, ?, ?, ?)', 
+    cursor.execute('INSERT INTO repuesto (nombre, descripcion, ubicacion, stock, maquina_id) VALUES (%s, %s, %s, %s, %s)', 
                    (nombre, descripcion, ubicacion, stock, maquina_id))
     conexion.commit()
     conexion.close()
@@ -122,14 +122,14 @@ def eliminar_repuesto(repuesto_id):
 
     try:
         # Verificar si el repuesto existe antes de eliminarlo
-        cursor.execute('SELECT * FROM repuesto WHERE id = ?', (repuesto_id,))
+        cursor.execute('SELECT * FROM repuesto WHERE id = %s', (repuesto_id,))
         repuesto = cursor.fetchone()
         if not repuesto:
             print(f"El repuesto con ID {repuesto_id} no existe.")
             return
 
         # Eliminar el repuesto
-        cursor.execute('DELETE FROM repuesto WHERE id = ?', (repuesto_id,))
+        cursor.execute('DELETE FROM repuesto WHERE id = %s', (repuesto_id,))
         repuestos_eliminados = cursor.rowcount
         print(f"{repuestos_eliminados} repuestos eliminados con ID {repuesto_id}.")
 
@@ -150,19 +150,19 @@ def eliminar_maquina(maquina_id):
 
     try:
         # Verificar si la máquina existe antes de eliminarla
-        cursor.execute('SELECT * FROM maquina WHERE id = ?', (maquina_id,))
+        cursor.execute('SELECT * FROM maquina WHERE id = %s', (maquina_id,))
         maquina = cursor.fetchone()
         if not maquina:
             print(f"La máquina con ID {maquina_id} no existe.")
             return
 
         # Eliminar todos los repuestos asociados a la máquina
-        cursor.execute('DELETE FROM repuesto WHERE maquina_id = ?', (maquina_id,))
+        cursor.execute('DELETE FROM repuesto WHERE maquina_id = %s', (maquina_id,))
         repuestos_eliminados = cursor.rowcount
         print(f"{repuestos_eliminados} repuestos eliminados para la máquina con ID {maquina_id}.")
 
         # Eliminar la máquina
-        cursor.execute('DELETE FROM maquina WHERE id = ?', (maquina_id,))
+        cursor.execute('DELETE FROM maquina WHERE id = %s', (maquina_id,))
         maquinas_eliminadas = cursor.rowcount
         print(f"{maquinas_eliminadas} máquinas eliminadas con ID {maquina_id}.")
 
@@ -194,8 +194,8 @@ def ejecutar_sql_comando(comando):
 def registrar_entrada(repuesto_id, cantidad):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('UPDATE repuesto SET stock = stock + ? WHERE id = ?', (cantidad, repuesto_id))
-    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (?, ?, "entrada", date("now"))', 
+    cursor.execute('UPDATE repuesto SET stock = stock + %s WHERE id = %s', (cantidad, repuesto_id))
+    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (%s, %s, "entrada", date("now"))', 
                    (repuesto_id, cantidad))
     conexion.commit()
     conexion.close()
@@ -204,8 +204,8 @@ def registrar_entrada(repuesto_id, cantidad):
 def registrar_salida(repuesto_id, cantidad):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('UPDATE repuesto SET stock = stock - ? WHERE id = ?', (cantidad, repuesto_id))
-    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (?, ?, "salida", date("now"))', 
+    cursor.execute('UPDATE repuesto SET stock = stock - %s WHERE id = %s', (cantidad, repuesto_id))
+    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (%s, %s, "salida", date("now"))', 
                    (repuesto_id, cantidad))
     conexion.commit()
     conexion.close()
@@ -225,10 +225,10 @@ def ver_stock(hospital_id=None, maquina_id=None):
     params = []
     
     if hospital_id and maquina_id:
-        query += ' WHERE hospital.id = ? AND maquina.id = ?'
+        query += ' WHERE hospital.id = %s AND maquina.id = %s'
         params = [hospital_id, maquina_id]
     elif hospital_id:
-        query += ' WHERE hospital.id = ?'
+        query += ' WHERE hospital.id = %s'
         params = [hospital_id]
 
     cursor.execute(query, params)
@@ -245,7 +245,7 @@ def buscar_repuesto(nombre_repuesto):
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
-        WHERE repuesto.nombre LIKE ?
+        WHERE repuesto.nombre LIKE %s
     ''', ('%' + nombre_repuesto + '%',))
     resultados = cursor.fetchall()
     conexion.close()
@@ -264,7 +264,7 @@ def obtener_hospitales():
 def obtener_maquinas(hospital_id):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('SELECT id, nombre FROM maquina WHERE hospital_id = ?', (hospital_id,))
+    cursor.execute('SELECT id, nombre FROM maquina WHERE hospital_id = %s', (hospital_id,))
     maquinas = cursor.fetchall()
     conexion.close()
     return maquinas
@@ -275,7 +275,7 @@ def obtener_repuestos(maquina_id=None):
     cursor = conexion.cursor()
     
     if maquina_id:
-        cursor.execute('SELECT id, nombre FROM repuesto WHERE maquina_id = ?', (maquina_id,))
+        cursor.execute('SELECT id, nombre FROM repuesto WHERE maquina_id = %s', (maquina_id,))
     else:
         cursor.execute('SELECT id, nombre FROM repuesto')
     
@@ -316,14 +316,14 @@ def eliminar_hospital(hospital_id):
     
     try:
         # Verificar si el hospital existe
-        cursor.execute('SELECT * FROM hospital WHERE id = ?', (hospital_id,))
+        cursor.execute('SELECT * FROM hospital WHERE id = %s', (hospital_id,))
         hospital = cursor.fetchone()
         if not hospital:
             print(f"El hospital con ID {hospital_id} no existe.")
             return
 
         # Eliminar el hospital
-        cursor.execute('DELETE FROM hospital WHERE id = ?', (hospital_id,))
+        cursor.execute('DELETE FROM hospital WHERE id = %s', (hospital_id,))
         print(f"Hospital con ID {hospital_id} eliminado.")
 
         conexion.commit()
