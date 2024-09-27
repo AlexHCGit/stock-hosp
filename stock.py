@@ -603,7 +603,6 @@ def interfaz_principal():
 if __name__ == "__main__":
     crear_tablas()  # Crear las tablas la primera vez que se ejecuta
     interfaz_principal()
-    port=int(os.environ.get('PORT', 8501))
-    st.run(host='0.0.0.0', port=port)
+    
     
 
