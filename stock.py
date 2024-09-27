@@ -2,12 +2,15 @@ import psycopg2
 import os
 import streamlit as st
 
-# Conectar a la base de datos SQLite
+# Función para conectar a la base de datos PostgreSQL
 def conectar_db():
-    DATABASE_URL = os.getenv("DATABASE_URL") # Render configurará automáticamente esta variable
+    # Obtener la URL de conexión desde la variable de entorno
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    
+    # Establecer la conexión usando psycopg2
     conexion = psycopg2.connect(DATABASE_URL)
     return conexion
-
+    
 # Crear tablas si no existen
 def crear_tablas():
     conexion = conectar_db()
