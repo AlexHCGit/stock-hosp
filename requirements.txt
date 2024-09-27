@@ -28,6 +28,7 @@ pandas==2.2.3
 pefile==2024.8.26
 pillow==10.4.0
 protobuf==5.28.2
+psycopg2==2.9.9
 pyarrow==17.0.0
 pydeck==0.9.1
 Pygments==2.18.0

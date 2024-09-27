@@ -1,9 +1,12 @@
-import sqlite3
+import psycopg2
+import os
 import streamlit as st
 
 # Conectar a la base de datos SQLite
 def conectar_db():
-    return sqlite3.connect('inventario.db')
+    DATABASE_URL = os.getenv("DATABASE_URL") # Render configurará automáticamente esta variable
+    conexion = psycopg2.connect(DATABASE_URL)
+    return conexion
 
 # Crear tablas si no existen
 def crear_tablas():
@@ -356,7 +359,7 @@ def interfaz_principal():
                                                             "Ver Maquinas", "Agregar Máquina",  
                                                              "Ver Máquinas por Hospital", 
                                                              "Eliminar Repuesto", 
-                                                            "Eliminar Máquina", "Eliminar Hospital"])
+                                                            "Eliminar Máquina", "Eliminar Hospital", "Eliminar Máquina Manual", "Eliminar Repuesto Manual"])
                                                             
 
     if opcion == "Registrar Entrada":
@@ -567,12 +570,14 @@ def interfaz_principal():
                 st.success(f"Hospital con ID {hospital_seleccionado} ha sido eliminado. Verifica en la lista actualizada.")
         else:
             st.info("No se encontraron hospitales para eliminar.")
+
     elif opcion == "Eliminar Máquina Manual":
         st.header("Eliminar Máquina Manual")
         maquina_id = st.text_input("Ingresa el ID de la máquina a eliminar")
         
         if st.button("Eliminar Máquina"):
             ejecutar_sql_comando(f"DELETE FROM maquina WHERE id = {maquina_id}")
+
     elif opcion == "Eliminar Repuesto Manual":
         st.header("Eliminar Repuesto Manual")
         repuesto_id = st.text_input("Ingresa el ID del repuesto a eliminar (solo números)")
