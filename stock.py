@@ -18,7 +18,7 @@ def crear_tablas():
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS hospital (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nombre TEXT NOT NULL,
             ubicacion TEXT
         );
@@ -26,37 +26,35 @@ def crear_tablas():
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS maquina (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nombre TEXT NOT NULL,
-            hospital_id INTEGER,
-            FOREIGN KEY(hospital_id) REFERENCES hospital(id)
+            hospital_id INTEGER REFERENCES hospital(id)
         );
     ''')
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS repuesto (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             nombre TEXT NOT NULL,
             descripcion TEXT,
             ubicacion TEXT,
             stock INTEGER DEFAULT 0,
-            maquina_id INTEGER,
-            FOREIGN KEY(maquina_id) REFERENCES maquina(id)
+            maquina_id INTEGER REFERENCES maquina(id)
         );
     ''')
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS movimiento_stock (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            repuesto_id INTEGER,
+            id SERIAL PRIMARY KEY,
+            repuesto_id INTEGER REFERENCES repuesto(id),
             cantidad INTEGER,
             tipo TEXT,
             fecha TEXT,
-            FOREIGN KEY(repuesto_id) REFERENCES repuesto(id)
         );
     ''')
 
     conexion.commit()
+    cursor.close()
     conexion.close()
 
 # Función para verificar si un hospital ya existe
