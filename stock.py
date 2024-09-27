@@ -592,6 +592,8 @@ def interfaz_principal():
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
+    st.run(port=8501, host='0.0.0.0')
     crear_tablas()  # Crear las tablas la primera vez que se ejecuta
     interfaz_principal()
+    
 
