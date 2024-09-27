@@ -217,7 +217,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
     cursor = conexion.cursor()
     
     query = '''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, maquina.nombre, hospital.nombre
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, maquina.nombre, hospital.nombre
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
