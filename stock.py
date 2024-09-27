@@ -348,16 +348,16 @@ def listar_tablas_y_claves():
 
 # Interfaz con Streamlit
 def interfaz_principal():
-    st.title("Gestión de Stock de Repuestos")
+    st.title("Gestión de Extra-Stock de Repuestos")
 
     # Pestañas para las diferentes funcionalidades
-    opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Registrar Entrada", "Registrar Salida", 
-                                                            "Agregar Hospital", "Ver Hospitales",
-                                                            "Ver Maquinas", "Ver Repuestos", 
-                                                            "Agregar Máquina", "Ver Máquinas por Hospital", 
-                                                            "Buscar Repuesto", "Eliminar Repuesto", 
-                                                            "Eliminar Máquina", "Eliminar Hospital",
-                                                            "Eliminar Repuesto Manual"])
+    opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Buscar Repuesto", "Registrar Entrada", "Registrar Salida", 
+                                                            "Ver Repuestos", "Ver Hospitales", "Agregar Hospital", 
+                                                            "Ver Maquinas", "Agregar Máquina",  
+                                                             "Ver Máquinas por Hospital", 
+                                                             "Eliminar Repuesto", 
+                                                            "Eliminar Máquina", "Eliminar Hospital"])
+                                                            
 
     if opcion == "Registrar Entrada":
         st.header("Registrar Entrada de Stock")
@@ -498,7 +498,7 @@ def interfaz_principal():
         
         repuestos = ver_stock(hospital_id, maquina_id)
         for repuesto in repuestos:
-            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[2]} | Stock: {repuesto[3]} | Máquina: {repuesto[4]} | Hospital: {repuesto[5]}")
+            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[2]} | Stock: {repuesto[3]}")
 
     elif opcion == "Agregar Hospital":
         st.header("Agregar Hospital")
