@@ -15,47 +15,54 @@ def conectar_db():
 def crear_tablas():
     conexion = conectar_db()
     cursor = conexion.cursor()
-    
+
+    # Crear tabla hospital
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS hospital (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT NOT NULL,
-            ubicacion TEXT
-        );
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS maquina (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT NOT NULL,
-            hospital_id INTEGER REFERENCES hospital(id)
-        );
-    ''')
-    
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS repuesto (
-            id SERIAL PRIMARY KEY,
-            nombre TEXT NOT NULL,
-            descripcion TEXT,
-            ubicacion TEXT,
-            stock INTEGER DEFAULT 0,
-            maquina_id INTEGER REFERENCES maquina(id)
-        );
+    CREATE TABLE IF NOT EXISTS hospital (
+        id SERIAL PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        ubicacion TEXT
+    );
     ''')
 
+    # Crear tabla maquina (con clave foránea hacia hospital)
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS movimiento_stock (
-            id SERIAL PRIMARY KEY,
-            repuesto_id INTEGER REFERENCES repuesto(id),
-            cantidad INTEGER,
-            tipo TEXT,
-            fecha TEXT,
-        );
+    CREATE TABLE IF NOT EXISTS maquina (
+        id SERIAL PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        hospital_id INTEGER NOT NULL,
+        FOREIGN KEY (hospital_id) REFERENCES hospital(id) ON DELETE CASCADE
+    );
+    ''')
+
+    # Crear tabla repuesto (con clave foránea hacia maquina)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS repuesto (
+        id SERIAL PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        descripcion TEXT,
+        stock INTEGER DEFAULT 0,
+        maquina_id INTEGER NOT NULL,
+        FOREIGN KEY (maquina_id) REFERENCES maquina(id) ON DELETE CASCADE
+    );
+    ''')
+
+    # Crear tabla movimiento_stock (con claves foráneas hacia repuesto)
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS movimiento_stock (
+        id SERIAL PRIMARY KEY,
+        repuesto_id INTEGER NOT NULL,
+        cantidad INTEGER,
+        tipo TEXT,
+        fecha DATE,
+        FOREIGN KEY (repuesto_id) REFERENCES repuesto(id) ON DELETE CASCADE
+    );
     ''')
 
     conexion.commit()
     cursor.close()
     conexion.close()
+
 
 # Función para verificar si un hospital ya existe
 def verificar_hospital(nombre, ubicacion):
