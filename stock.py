@@ -64,6 +64,21 @@ def crear_tablas():
     cursor.close()
     conexion.close()
 
+def agregar_columna_ubicacion():
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    # Agregar la columna ubicacion a la tabla repuesto si no existe
+    cursor.execute('''
+    ALTER TABLE repuesto
+    ADD COLUMN IF NOT EXISTS ubicacion TEXT;
+    ''')
+
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+
+
 
 # Función para verificar si un hospital ya existe
 def verificar_hospital(nombre, ubicacion):
@@ -602,6 +617,7 @@ def interfaz_principal():
 # Ejecutar la aplicación
 if __name__ == "__main__":
     crear_tablas()  # Crear las tablas la primera vez que se ejecuta
+    agregar_columna_ubicacion()  # Agregar la columna 'ubicacion' si no existe
     interfaz_principal()
     
     
