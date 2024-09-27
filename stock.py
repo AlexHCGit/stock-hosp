@@ -42,6 +42,7 @@ def crear_tablas():
         nombre TEXT NOT NULL,
         descripcion TEXT,
         stock INTEGER DEFAULT 0,
+        ubicacion TEXT,
         maquina_id INTEGER NOT NULL,
         FOREIGN KEY (maquina_id) REFERENCES maquina(id) ON DELETE CASCADE
     );
