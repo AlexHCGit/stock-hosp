@@ -257,7 +257,7 @@ def buscar_repuesto(nombre_repuesto):
     conexion = conectar_db()
     cursor = conexion.cursor()
     cursor.execute('''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, maquina.nombre, hospital.nombre
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, repuesto.ubicacion, maquina.nombre, hospital.nombre
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
@@ -525,7 +525,7 @@ def interfaz_principal():
         
         repuestos = ver_stock(hospital_id, maquina_id)
         for repuesto in repuestos:
-            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[3]} | Stock: {repuesto[2]}")
+            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[4]} | Stock: {repuesto[2]}")
 
     elif opcion == "Agregar Hospital":
         st.header("Agregar Hospital")
