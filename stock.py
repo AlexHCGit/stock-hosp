@@ -287,7 +287,7 @@ def buscar_repuesto(nombre_repuesto):
     conexion = conectar_db()
     cursor = conexion.cursor()
     cursor.execute('''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, repuesto.ubicacion, maquina.nombre, hospital.nombre
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, maquina.nombre, hospital.nombre
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
