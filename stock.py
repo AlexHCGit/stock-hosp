@@ -479,19 +479,40 @@ def interfaz_principal():
 
     elif opcion == "Registrar Salida":
         st.header("Registrar Salida de Stock")
+    
+        # Obtener lista de hospitales
         hospitales = obtener_hospitales()
         hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+    
+        # Obtener las máquinas asociadas al hospital seleccionado
         maquinas = obtener_maquinas(hospital_id)
-        maquina_id = st.selectbox("Selecciona una Máquina", [m[0] for m in maquinas], format_func=lambda x: dict(maquinas)[x])
-        
+        maquina_seleccionada = st.selectbox("Selecciona una Máquina", maquinas, format_func=lambda x: f"ID: {x[0]} | Máquina: {x[1]}")
+        maquina_id = maquina_seleccionada[0]
+    
+        # Obtener los repuestos asociados a la máquina seleccionada
         repuestos = obtener_repuestos(maquina_id)
-        repuesto_nombre = st.selectbox("Selecciona un Repuesto", [r[1] for r in repuestos])
-        repuesto_id = dict((r[1], r[0]) for r in repuestos)[repuesto_nombre]
         
-        cantidad = st.number_input("Cantidad a Sacar", min_value=1)
-        if st.button("Registrar Salida"):
-            registrar_salida(repuesto_id, cantidad)
-            st.success(f"Salida de {cantidad} unidades registrada para el repuesto '{repuesto_nombre}'.")
+        if repuestos:
+            repuesto_nombre = st.selectbox("Selecciona un Repuesto", [r[1] for r in repuestos])
+    
+            # Comprobar que se ha seleccionado un repuesto antes de proceder
+            if repuesto_nombre:
+                # Mapear el nombre del repuesto a su ID
+                repuesto_id = dict((r[1], r[0]) for r in repuestos).get(repuesto_nombre)
+    
+                # Campo para ingresar la cantidad de salida
+                cantidad = st.number_input("Cantidad a retirar", min_value=1, step=1)
+    
+                if st.button(f"Registrar salida de {cantidad} unidades de {repuesto_nombre}"):
+                    if repuesto_id is not None:
+                        registrar_salida(repuesto_id, cantidad)
+                        st.success(f"Salida de {cantidad} unidades del repuesto '{repuesto_nombre}' registrada correctamente.")
+                    else:
+                        st.error("Error: No se pudo encontrar el ID del repuesto seleccionado.")
+            else:
+                st.error("Error: Debes seleccionar un repuesto.")
+        else:
+            st.info("No hay repuestos disponibles para esta máquina.")
 
     elif opcion == "Ver Movimientos":
         st.header("Registro de Movimientos de Stock")
