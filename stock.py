@@ -166,10 +166,10 @@ def eliminar_maquina(maquina_id):
 
     try:
         # Verificar si la máquina existe antes de eliminarla
-        consulta_verificar_maquina = f"SELECT * FROM maquina WHERE id = {maquina_id};"
+        # consulta_verificar_maquina = f"SELECT * FROM maquina WHERE id = {maquina_id};"
         conexion = conectar_db()
         cursor = conexion.cursor()
-        cursor.execute(consulta_verificar_maquina)
+        cursor.execute("SELECT * FROM maquina WHERE id = {maquina_id}")
         maquina = cursor.fetchone()
         
         if not maquina:
@@ -177,13 +177,13 @@ def eliminar_maquina(maquina_id):
             return
 
         # Eliminar todos los repuestos asociados a la máquina
-        eliminar_repuestos_sql = f"DELETE FROM repuesto WHERE maquina_id = {maquina_id};"
-        ejecutar_sql_comando(eliminar_repuestos_sql)
+        # eliminar_repuestos_sql = f"DELETE FROM repuesto WHERE maquina_id = {maquina_id};"
+        ejecutar_sql_comando("DELETE FROM repuesto WHERE maquina_id = {maquina_id}")
         print(f"Repuestos asociados con la máquina ID {maquina_id} eliminados correctamente.")
 
         # Eliminar la máquina
-        eliminar_maquina_sql = f"DELETE FROM maquina WHERE id = {maquina_id};"
-        ejecutar_sql_comando(eliminar_maquina_sql)
+        # eliminar_maquina_sql = f"DELETE FROM maquina WHERE id = {maquina_id};"
+        ejecutar_sql_comando("DELETE FROM maquina WHERE id = {maquina_id}")
         print(f"Máquina con ID {maquina_id} eliminada correctamente.")
 
     except psycopg2.Error as e:
