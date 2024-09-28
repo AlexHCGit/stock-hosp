@@ -328,7 +328,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
 
     # Consulta SQL para obtener el stock de los repuestos
     query = '''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, repuesto.ubicacion,
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, repuesto.ubicacion
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
