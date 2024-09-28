@@ -323,11 +323,12 @@ def registrar_salida(repuesto_id, cantidad):
 
 # Función para mostrar el stock actual según hospital y máquina
 def ver_stock(hospital_id=None, maquina_id=None):
-    conexion = conectar_db()
+    conexion = conectar_db()  # Conectar a la base de datos
     cursor = conexion.cursor()
-    
+
+    # Consulta SQL para obtener el stock de los repuestos
     query = '''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, maquina.nombre, hospital.nombre
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, repuesto.ubicacion, maquina.nombre, hospital.nombre
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
@@ -335,6 +336,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
     
     params = []
     
+    # Filtrar por hospital y máquina si están seleccionados
     if hospital_id and maquina_id:
         query += ' WHERE hospital.id = %s AND maquina.id = %s'
         params = [hospital_id, maquina_id]
@@ -345,7 +347,17 @@ def ver_stock(hospital_id=None, maquina_id=None):
     cursor.execute(query, params)
     repuestos = cursor.fetchall()
     conexion.close()
-    return repuestos
+
+    # Convertir los resultados en un dataframe de Pandas
+    df_repuestos = pd.DataFrame(repuestos, columns=['Nombre Repuesto', 'Descripción', 'Stock', 'Ubicación', 'Máquina', 'Hospital'])
+
+    if not df_repuestos.empty:
+        # Mostrar el dataframe en la interfaz de usuario
+        st.dataframe(df_repuestos)
+    else:
+        st.info("No hay repuestos disponibles para mostrar.")
+
+
 
 # Función para buscar un repuesto por nombre y mostrar dónde está
 def buscar_repuesto(nombre_repuesto):
@@ -742,20 +754,22 @@ def interfaz_principal():
         else:
             st.info("No hay máquinas disponibles para eliminar en este hospital.")
 
-
-
-
-
     elif opcion == "Ver Stock":
-        st.header("Stock por Hospital y Máquina")
-        hospitales = obtener_hospitales()
-        hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
-        maquinas = obtener_maquinas(hospital_id)
-        maquina_id = st.selectbox("Selecciona una Máquina", [m[0] for m in maquinas], format_func=lambda x: dict(maquinas)[x])
-        
-        repuestos = ver_stock(hospital_id, maquina_id)
-        for repuesto in repuestos:
-            st.write(f"Repuesto: {repuesto[0]} | Descripción: {repuesto[1]} | Ubicación: {repuesto[4]} | Stock: {repuesto[2]}")
+    st.header("Ver Stock de Repuestos")
+    
+    # Seleccionar hospital y máquina
+    hospitales = obtener_hospitales()
+    hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+
+    maquinas = obtener_maquinas(hospital_id)
+    maquina_id = st.selectbox("Selecciona una Máquina", [m[0] for m in maquinas], format_func=lambda x: dict((m[0], m[1]) for m in maquinas)[x])
+    
+    # Mostrar el stock en formato dataframe
+    if hospital_id and maquina_id:
+        ver_stock(hospital_id, maquina_id)
+    else:
+        st.info("Selecciona un hospital y una máquina para ver el stock.")
+
 
     elif opcion == "Agregar Hospital":
         st.header("Agregar Hospital")
