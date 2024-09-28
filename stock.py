@@ -152,7 +152,7 @@ def eliminar_repuesto(repuesto_id):
         conexion.commit()
         print(f"Operación de eliminación confirmada en la base de datos.")
 
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print(f"Error durante la eliminación del repuesto: {e}")
         conexion.rollback()
 
@@ -185,7 +185,7 @@ def eliminar_maquina(maquina_id):
         conexion.commit()
         print("Operación de eliminación confirmada en la base de datos.")
 
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print(f"Error durante la eliminación de la máquina: {e}")
         conexion.rollback()
 
@@ -199,7 +199,7 @@ def ejecutar_sql_comando(comando):
         cursor.execute(comando)
         conexion.commit()
         print(f"Comando ejecutado: {comando}")
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print(f"Error ejecutando el comando: {e}")
     finally:
         conexion.close()
@@ -345,7 +345,7 @@ def eliminar_hospital(hospital_id):
         conexion.commit()
         print(f"El hospital ha sido eliminado correctamente.")
         
-    except sqlite3.Error as e:
+    except psycopg2.Error as e:
         print(f"Error durante la eliminación del hospital: {e}")
         conexion.rollback()
 
