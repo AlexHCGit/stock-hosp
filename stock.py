@@ -216,21 +216,45 @@ def ejecutar_sql_comando(comando):
 def registrar_entrada(repuesto_id, cantidad):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('UPDATE repuesto SET stock = stock + %s WHERE id = %s', (cantidad, repuesto_id))
-    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (%s, %s, "entrada", date("now"))', 
-                   (repuesto_id, cantidad))
-    conexion.commit()
-    conexion.close()
+
+    try:
+        # Actualizar el stock del repuesto existente
+        cursor.execute('UPDATE repuesto SET stock = stock + %s WHERE id = %s', (cantidad, repuesto_id))
+        # Registrar el movimiento de entrada en la tabla movimiento_stock
+        cursor.execute('''
+            INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha)
+            VALUES (%s, %s, %s, CURRENT_DATE)
+        ''', (repuesto_id, cantidad, 'entrada'))
+
+        conexion.commit()
+        st.success(f"Entrada de {cantidad} unidades del repuesto con ID {repuesto_id} registrada correctamente.")
+    except psycopg2.Error as e:
+        st.error(f"Error al registrar la entrada de stock: {e}")
+        conexion.rollback()
+    finally:
+        conexion.close()
 
 # Función para registrar una salida de stock
 def registrar_salida(repuesto_id, cantidad):
     conexion = conectar_db()
     cursor = conexion.cursor()
-    cursor.execute('UPDATE repuesto SET stock = stock - %s WHERE id = %s', (cantidad, repuesto_id))
-    cursor.execute('INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha) VALUES (%s, %s, "salida", date("now"))', 
-                   (repuesto_id, cantidad))
-    conexion.commit()
-    conexion.close()
+
+    try:
+        # Actualizar el stock del repuesto existente (disminuir stock)
+        cursor.execute('UPDATE repuesto SET stock = stock - %s WHERE id = %s', (cantidad, repuesto_id))
+
+        #Registrar el movimiento de salida en la tabla movimienot_stock
+        cursor.execute('''
+            INSERT INTO movimiento_stock (repuesto_id, cantidad, tipo, fecha)
+            VALUES (%s, %s, %s, CURRENT_DATE) 
+        ''', (repuesto_id, cantidad, 'salida'))
+        conexion.commit()
+        st.succes(f"Salida de {cantidad} unidades del repuesto con ID {repuesto_id} registrada correctamente.")
+    except psycopg2.Error as e:
+        st.error(f"Error al registrar la salida de stock: {e}")
+        conexion.rollback()
+    finally:
+        conexion.close()
 
 # Función para mostrar el stock actual según hospital y máquina
 def ver_stock(hospital_id=None, maquina_id=None):
