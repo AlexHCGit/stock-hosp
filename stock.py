@@ -403,16 +403,38 @@ def listar_tablas_y_claves():
 
     conexion.close()
 
+# Función para mostrar registro de movimientos.
+def obtener_movimientos():
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    
+    # Consulta SQL para obtener los movimientos
+    cursor.execute('''
+        SELECT movimiento_stock.repuesto_id, repuesto.nombre, repuesto.descripcion, movimiento_stock.cantidad, 
+               movimiento_stock.tipo, movimiento_stock.fecha, maquina.nombre AS maquina, hospital.nombre AS hospital
+        FROM movimiento_stock
+        JOIN repuesto ON movimiento_stock.repuesto_id = repuesto.id
+        JOIN maquina ON repuesto.maquina_id = maquina.id
+        JOIN hospital ON maquina.hospital_id = hospital.id
+        ORDER BY movimiento_stock.fecha DESC;
+    ''')
+
+    # Obtener todos los registros
+    movimientos = cursor.fetchall()
+    conexion.close()
+    return movimientos
+
+
+
 # Interfaz con Streamlit
 def interfaz_principal():
     st.title("Gestión de Extra-Stock de Repuestos")
 
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Buscar Repuesto", "Registrar Entrada", "Registrar Salida", 
-                                                             "Ver Hospitales", "Agregar Hospital", 
-                                                             "Agregar Máquina",  
-                                                             "Ver Máquinas por Hospital", 
-                                                             "Eliminar Repuesto", 
+                                                            "Ver Hospitales", "Agregar Hospital", 
+                                                            "Ver Máquinas por Hospital", "Agregar Máquina", 
+                                                            "Ver Movimientos", "Eliminar Repuesto", 
                                                             "Eliminar Máquina", "Eliminar Hospital"])
                                                             
 
@@ -471,6 +493,29 @@ def interfaz_principal():
             registrar_salida(repuesto_id, cantidad)
             st.success(f"Salida de {cantidad} unidades registrada para el repuesto '{repuesto_nombre}'.")
 
+    elif opcion == "Ver Movimientos":
+        st.header("Registro de Movimientos de Stock")
+    
+        # Obtener la lista de movimientos
+        movimientos = obtener_movimientos()
+    
+        # Verificar si hay movimientos en el registro
+        if movimientos:
+            # Mostrar los movimientos en una tabla
+            st.write("Movimientos registrados:")
+            st.table([{
+                "Repuesto": movimiento[1],
+                "Descripción": movimiento[2],
+                "Cantidad": movimiento[3],
+                "Tipo": movimiento[4],
+                "Fecha": movimiento[5],
+                "Máquina": movimiento[6],
+                "Hospital": movimiento[7]
+            } for movimiento in movimientos])
+        else:
+            st.info("No se encontraron movimientos registrados.")
+
+    
     elif opcion == "Eliminar Repuesto":
         st.header("Eliminar Repuesto")
 
