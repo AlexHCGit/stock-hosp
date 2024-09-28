@@ -249,7 +249,7 @@ def registrar_salida(repuesto_id, cantidad):
             VALUES (%s, %s, %s, CURRENT_DATE) 
         ''', (repuesto_id, cantidad, 'salida'))
         conexion.commit()
-        st.succes(f"Salida de {cantidad} unidades del repuesto con ID {repuesto_id} registrada correctamente.")
+        st.success(f"Salida de {cantidad} unidades del repuesto con ID {repuesto_id} registrada correctamente.")
     except psycopg2.Error as e:
         st.error(f"Error al registrar la salida de stock: {e}")
         conexion.rollback()
