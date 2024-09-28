@@ -70,8 +70,8 @@ def cargar_repuestos_desde_excel(df, maquina_id):
     # Definir las columnas requeridas
     columnas_requeridas = ['nombre', 'descripcion', 'stock', 'ubicacion']
 
-    # Mantener solo las columnas requeridas
-    df = df[columnas_requeridas]
+    # Mantener solo las columnas requeridas y eliminar filas con valores NaN en la columna 'nombre'
+    df = df[columnas_requeridas].dropna(subset=['nombre'])
 
     conexion = conectar_db()
     cursor = conexion.cursor()
@@ -79,9 +79,9 @@ def cargar_repuestos_desde_excel(df, maquina_id):
     try:
         for index, row in df.iterrows():
             nombre = row['nombre']
-            descripcion = row['descripcion']
-            stock = row['stock']
-            ubicacion = row['ubicacion']
+            descripcion = row['descripcion'] if pd.notna(row['descripcion']) else ""  # Manejar NaN como cadenas vacías
+            stock = row['stock'] if pd.notna(row['stock']) else 0  # Manejar NaN como 0
+            ubicacion = row['ubicacion'] if pd.notna(row['ubicacion']) else ""  # Manejar NaN como cadenas vacías
 
             # Verificar si el repuesto ya existe en la misma máquina
             cursor.execute('''
@@ -113,6 +113,7 @@ def cargar_repuestos_desde_excel(df, maquina_id):
         st.error(f"Error al cargar los repuestos: {e}")
     finally:
         conexion.close()
+
 
 
 def agregar_columna_ubicacion():
