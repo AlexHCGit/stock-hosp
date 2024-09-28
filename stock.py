@@ -1,6 +1,7 @@
 import psycopg2
 import os
 import streamlit as st
+import pandas as pd
 
 # Función para conectar a la base de datos PostgreSQL
 def conectar_db():
@@ -63,6 +64,56 @@ def crear_tablas():
     conexion.commit()
     cursor.close()
     conexion.close()
+
+# Función para cargar los repuestos desde excel
+def cargar_repuestos_desde_excel(df, maquina_id):
+    # Definir las columnas requeridas
+    columnas_requeridas = ['nombre', 'descripcion', 'stock', 'ubicacion']
+
+    # Mantener solo las columnas requeridas
+    df = df[columnas_requeridas]
+
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    try:
+        for index, row in df.iterrows():
+            nombre = row['nombre']
+            descripcion = row['descripcion']
+            stock = row['stock']
+            ubicacion = row['ubicacion']
+
+            # Verificar si el repuesto ya existe en la misma máquina
+            cursor.execute('''
+                SELECT id FROM repuesto 
+                WHERE nombre = %s AND maquina_id = %s
+            ''', (nombre, maquina_id))
+            repuesto_existente = cursor.fetchone()
+
+            if repuesto_existente:
+                # Si el repuesto ya existe, actualizar el stock
+                repuesto_id = repuesto_existente[0]
+                cursor.execute('''
+                    UPDATE repuesto SET stock = stock + %s, descripcion = %s, ubicacion = %s WHERE id = %s
+                ''', (stock, descripcion, ubicacion, repuesto_id))
+                st.info(f"Repuesto '{nombre}' ya existe. Stock actualizado.")
+            else:
+                # Si no existe, insertar un nuevo repuesto
+                cursor.execute('''
+                    INSERT INTO repuesto (nombre, descripcion, stock, ubicacion, maquina_id) 
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (nombre, descripcion, stock, ubicacion, maquina_id))
+                st.success(f"Repuesto '{nombre}' añadido correctamente.")
+        
+        # Confirmar los cambios en la base de datos
+        conexion.commit()
+
+    except Exception as e:
+        conexion.rollback()
+        st.error(f"Error al cargar los repuestos: {e}")
+    finally:
+        conexion.close()
+
 
 def agregar_columna_ubicacion():
     conexion = conectar_db()
@@ -445,7 +496,7 @@ def interfaz_principal():
 
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Buscar Repuesto", "Registrar Entrada", "Registrar Salida", 
-                                                            "Ver Hospitales", "Agregar Hospital", 
+                                                            "Cargar repuestos desde Excel", "Ver Hospitales", "Agregar Hospital", 
                                                             "Ver Máquinas por Hospital", "Agregar Máquina", 
                                                             "Ver Movimientos", "Eliminar Repuesto", 
                                                             "Eliminar Máquina", "Eliminar Hospital"])
@@ -490,7 +541,42 @@ def interfaz_principal():
             if st.button("Registrar entrada"):
                 registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad)
 
-        
+    
+    elif opcion == "Cargar repuestos desde Excel":
+        st.header("Cargar Repuestos desde un archivo Excel")
+    
+        # Subir el archivo Excel
+        archivo_excel = st.file_uploader("Sube un archivo Excel", type=["xlsx"])
+    
+        if archivo_excel is not None:
+            # Leer el archivo Excel
+            df = pd.read_excel(archivo_excel)
+    
+            # Validar que el archivo tenga las columnas necesarias
+            columnas_requeridas = ['nombre', 'descripcion', 'stock', 'ubicacion']
+            if all(col in df.columns for col in columnas_requeridas):
+                st.success("Archivo cargado correctamente con las columnas necesarias.")
+                
+                # Mostrar los datos del archivo Excel
+                st.write("Datos cargados desde el archivo:")
+                st.dataframe(df)
+    
+                # Seleccionar un hospital
+                hospitales = obtener_hospitales()
+                hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+    
+                # Seleccionar una máquina del hospital seleccionado
+                maquinas = obtener_maquinas(hospital_id)
+                maquina_seleccionada = st.selectbox("Selecciona una Máquina", maquinas, format_func=lambda x: f"ID: {x[0]} | Máquina: {x[1]}")
+                maquina_id = maquina_seleccionada[0]
+    
+                if st.button("Cargar repuestos en la base de datos"):
+                    # Insertar los datos del Excel en la base de datos
+                    cargar_repuestos_desde_excel(df, maquina_id)
+            else:
+                st.error(f"El archivo Excel debe contener las siguientes columnas: {', '.join(columnas_requeridas)}.")
+
+    
     elif opcion == "Registrar Salida":
         st.header("Registrar Salida de Stock")
     
