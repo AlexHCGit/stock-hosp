@@ -428,7 +428,7 @@ def obtener_movimientos():
 
 # Interfaz con Streamlit
 def interfaz_principal():
-    st.title("Gestión de Extra-Stock de Repuestos")
+    st.title("Gestión de Extra-Stock")
 
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Buscar Repuesto", "Registrar Entrada", "Registrar Salida", 
