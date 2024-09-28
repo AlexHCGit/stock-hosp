@@ -480,15 +480,7 @@ def interfaz_principal():
     
         if st.button(f"Registrar entrada"):
             registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad)
-            else:
-                # Si selecciona un repuesto existente, registrar la entrada
-                cantidad = st.number_input("Cantidad a Ingresar", min_value=1)
-                repuesto_id = dict((r[1], r[0]) for r in repuestos)[repuesto_seleccionado]
-    
-                if st.button("Registrar Entrada"):
-                    registrar_entrada(repuesto_id, cantidad)
-                    st.success(f"Entrada de {cantidad} unidades registrada para el repuesto '{repuesto_seleccionado}'.")
-
+        
     elif opcion == "Registrar Salida":
         st.header("Registrar Salida de Stock")
     
