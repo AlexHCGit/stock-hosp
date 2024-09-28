@@ -500,7 +500,71 @@ def obtener_movimientos():
     movimientos = cursor.fetchall()
     conexion.close()
     return movimientos
+import pandas as pd
 
+# Función para Ver los Hospitales
+def ver_hospitales():
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    # Obtener los hospitales de la base de datos
+    cursor.execute('SELECT nombre, ubicacion FROM hospital')
+    hospitales = cursor.fetchall()
+    conexion.close()
+
+    # Convertir los resultados en un dataframe de Pandas
+    df_hospitales = pd.DataFrame(hospitales, columns=['Nombre del Hospital', 'Ubicación'])
+
+    if not df_hospitales.empty:
+        # Mostrar el dataframe en la interfaz de usuario
+        st.dataframe(df_hospitales)
+    else:
+        st.info("No hay hospitales disponibles para mostrar.")
+
+# Función para ver Máquinas por Hospital
+def ver_maquinas(hospital_id):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    # Consulta SQL para obtener las máquinas por hospital
+    cursor.execute('SELECT maquina.nombre, hospital.nombre FROM maquina JOIN hospital ON maquina.hospital_id = hospital.id WHERE hospital.id = %s', (hospital_id,))
+    maquinas = cursor.fetchall()
+    conexion.close()
+
+    # Convertir los resultados en un dataframe
+    df_maquinas = pd.DataFrame(maquinas, columns=['Nombre de la Máquina', 'Hospital'])
+
+    if not df_maquinas.empty:
+        # Mostrar el dataframe en la interfaz de usuario
+        st.dataframe(df_maquinas)
+    else:
+        st.info("No hay máquinas disponibles para este hospital.")
+
+# Función para ver movimientos del stock
+def ver_movimientos():
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    # Consulta SQL para obtener los movimientos de stock
+    cursor.execute('''
+        SELECT repuesto.nombre, movimiento_stock.cantidad, movimiento_stock.tipo, movimiento_stock.fecha, maquina.nombre, hospital.nombre
+        FROM movimiento_stock
+        JOIN repuesto ON movimiento_stock.repuesto_id = repuesto.id
+        JOIN maquina ON repuesto.maquina_id = maquina.id
+        JOIN hospital ON maquina.hospital_id = hospital.id
+        ORDER BY movimiento_stock.fecha DESC
+    ''')
+    movimientos = cursor.fetchall()
+    conexion.close()
+
+    # Convertir los resultados en un dataframe de Pandas
+    df_movimientos = pd.DataFrame(movimientos, columns=['Repuesto', 'Cantidad', 'Tipo', 'Fecha', 'Máquina', 'Hospital'])
+
+    if not df_movimientos.empty:
+        # Mostrar el dataframe en la interfaz de usuario
+        st.dataframe(df_movimientos)
+    else:
+        st.info("No hay movimientos de stock disponibles para mostrar.")
 
 
 # Interfaz con Streamlit
@@ -628,26 +692,9 @@ def interfaz_principal():
             st.info("No hay repuestos disponibles para esta máquina.")
 
     elif opcion == "Ver Movimientos":
-        st.header("Registro de Movimientos de Stock")
-    
-        # Obtener la lista de movimientos
-        movimientos = obtener_movimientos()
-    
-        # Verificar si hay movimientos en el registro
-        if movimientos:
-            # Mostrar los movimientos en una tabla
-            st.write("Movimientos registrados:")
-            st.table([{
-                "Repuesto": movimiento[1],
-                "Descripción": movimiento[2],
-                "Cantidad": movimiento[3],
-                "Tipo": movimiento[4],
-                "Fecha": movimiento[5],
-                "Máquina": movimiento[6],
-                "Hospital": movimiento[7]
-            } for movimiento in movimientos])
-        else:
-            st.info("No se encontraron movimientos registrados.")
+    st.header("Ver Movimientos de Stock")
+    ver_movimientos()
+
 
     
     elif opcion == "Eliminar Repuesto":
@@ -779,10 +826,9 @@ def interfaz_principal():
             agregar_hospital(nombre, ubicacion)
 
     elif opcion == "Ver Hospitales":
-        st.header("Lista de Hospitales")
-        hospitales = obtener_hospitales()
-        for hospital in hospitales:
-            st.write(f"Nombre: {hospital[1]} | Ubicación: {hospital[2]}")
+        st.header("Ver Hospitales")
+        ver_hospitales()
+
 
     elif opcion == "Agregar Máquina":
         st.header("Agregar Máquina")
@@ -794,11 +840,17 @@ def interfaz_principal():
 
     elif opcion == "Ver Máquinas por Hospital":
         st.header("Ver Máquinas por Hospital")
+        
+        # Seleccionar un hospital
         hospitales = obtener_hospitales()
         hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
-        maquinas = obtener_maquinas(hospital_id)
-        for maquina in maquinas:
-            st.write(f"Máquina: {maquina[1]}")
+    
+        # Mostrar las máquinas asociadas al hospital seleccionado
+        if hospital_id:
+            ver_maquinas(hospital_id)
+        else:
+            st.info("Selecciona un hospital para ver las máquinas.")
+
 
     elif opcion == "Buscar Repuesto":
         st.header("Buscar Repuesto")
