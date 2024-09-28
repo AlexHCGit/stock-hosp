@@ -349,7 +349,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
     conexion.close()
 
     # Convertir los resultados en un dataframe de Pandas
-    df_repuestos = pd.DataFrame(repuestos, columns=['Nombre Repuesto', 'Descripción', 'Stock', 'Ubicación'])
+    df_repuestos = pd.DataFrame(repuestos, columns=['PartNumber Repuesto', 'Descripción', 'Stock', 'Ubicación'])
 
     if not df_repuestos.empty:
         # Mostrar el dataframe en la interfaz de usuario
@@ -359,7 +359,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
 
 
 
-# Función para buscar un repuesto por nombre y mostrar dónde está
+# Función para buscar un repuesto por partnumber (nombre) y mostrar dónde está
 def buscar_repuesto(nombre_repuesto):
     conexion = conectar_db()
     cursor = conexion.cursor()
