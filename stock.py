@@ -68,17 +68,17 @@ def crear_tablas():
 # Función para cargar los repuestos desde excel
 def cargar_repuestos_desde_excel(df, maquina_id):
     # Definir las columnas requeridas
-    columnas_requeridas = ['nombre', 'descripcion', 'stock', 'ubicacion']
+    columnas_requeridas = ['partnumber', 'descripcion', 'stock', 'ubicacion']
 
     # Mantener solo las columnas requeridas y eliminar filas con valores NaN en la columna 'nombre'
-    df = df[columnas_requeridas].dropna(subset=['nombre'])
+    df = df[columnas_requeridas].dropna(subset=['partnumber'])
 
     conexion = conectar_db()
     cursor = conexion.cursor()
 
     try:
         for index, row in df.iterrows():
-            nombre = row['nombre']
+            nombre = row['partnumber']
             descripcion = row['descripcion'] if pd.notna(row['descripcion']) else ""  # Manejar NaN como cadenas vacías
             stock = row['stock'] if pd.notna(row['stock']) else 0  # Manejar NaN como 0
             ubicacion = row['ubicacion'] if pd.notna(row['ubicacion']) else ""  # Manejar NaN como cadenas vacías
@@ -603,7 +603,7 @@ def interfaz_principal():
     
         # Si se selecciona "Nuevo Repuesto", mostrar campos adicionales para el nuevo repuesto
         if repuesto_seleccionado == "Nuevo Repuesto":
-            nombre_repuesto = st.text_input("Nombre del nuevo repuesto")
+            nombre_repuesto = st.text_input("PartNumber del nuevo repuesto")
             descripcion_repuesto = st.text_input("Descripción del nuevo repuesto")
             ubicacion_repuesto = st.text_input("Ubicación del nuevo repuesto")
     
@@ -630,7 +630,7 @@ def interfaz_principal():
             df = pd.read_excel(archivo_excel)
     
             # Validar que el archivo tenga las columnas necesarias
-            columnas_requeridas = ['nombre', 'descripcion', 'stock', 'ubicacion']
+            columnas_requeridas = ['partnumber', 'descripcion', 'stock', 'ubicacion']
             if all(col in df.columns for col in columnas_requeridas):
                 st.success("Archivo cargado correctamente con las columnas necesarias.")
                 
@@ -854,7 +854,7 @@ def interfaz_principal():
 
     elif opcion == "Buscar Repuesto":
         st.header("Buscar Repuesto")
-        nombre_repuesto = st.text_input("Nombre del Repuesto")
+        nombre_repuesto = st.text_input("PartNumber del Repuesto")
         if st.button("Buscar"):
             resultados = buscar_repuesto(nombre_repuesto)
             if resultados:
@@ -875,7 +875,7 @@ def interfaz_principal():
         repuestos = listar_repuestos()
         if repuestos:
             for repuesto in repuestos:
-                st.write(f"ID: {repuesto[0]}, Nombre: {repuesto[1]}, Máquina ID: {repuesto[4]}, Stock: {repuesto[3]}")
+                st.write(f"ID: {repuesto[0]}, PartNumber: {repuesto[1]}, Máquina ID: {repuesto[4]}, Stock: {repuesto[3]}")
         else:
             st.info("No se encontraron repuestos.")
     elif opcion == "Eliminar Hospital":
