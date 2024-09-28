@@ -166,33 +166,37 @@ def eliminar_maquina(maquina_id):
 
     try:
         # Verificar si la máquina existe antes de eliminarla
-        # consulta_verificar_maquina = f"SELECT * FROM maquina WHERE id = {maquina_id};"
-        conexion = conectar_db()
-        cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM maquina WHERE id = {maquina_id}")
+        cursor.execute('SELECT * FROM maquina WHERE id = %s', (maquina_id,))
         maquina = cursor.fetchone()
-        
         if not maquina:
             print(f"La máquina con ID {maquina_id} no existe.")
+            st.write(f"La máquina con ID {maquina_id} no existe.")
             return
 
         # Eliminar todos los repuestos asociados a la máquina
-        # eliminar_repuestos_sql = f"DELETE FROM repuesto WHERE maquina_id = {maquina_id};"
-        ejecutar_sql_comando("DELETE FROM repuesto WHERE maquina_id = {maquina_id}")
-        print(f"Repuestos asociados con la máquina ID {maquina_id} eliminados correctamente.")
+        cursor.execute('DELETE FROM repuesto WHERE maquina_id = %s', (maquina_id,))
+        repuestos_eliminados = cursor.rowcount
+        print(f"{repuestos_eliminados} repuestos eliminados para la máquina con ID {maquina_id}.")
+        st.write(f"{repuestos_eliminados} repuestos eliminados para la máquina con ID {maquina_id}.")  # Verificar eliminación de repuestos
 
         # Eliminar la máquina
-        # eliminar_maquina_sql = f"DELETE FROM maquina WHERE id = {maquina_id};"
-        ejecutar_sql_comando("DELETE FROM maquina WHERE id = {maquina_id}")
-        print(f"Máquina con ID {maquina_id} eliminada correctamente.")
+        cursor.execute('DELETE FROM maquina WHERE id = %s', (maquina_id,))
+        maquinas_eliminadas = cursor.rowcount
+        print(f"{maquinas_eliminadas} máquinas eliminadas con ID {maquina_id}.")
+        st.write(f"{maquinas_eliminadas} máquinas eliminadas con ID {maquina_id}.")  # Verificar eliminación de la máquina
+
+        conexion.commit()
+        print("Operación de eliminación confirmada en la base de datos.")
+        st.write("Operación de eliminación confirmada en la base de datos.")
 
     except psycopg2.Error as e:
         print(f"Error durante la eliminación de la máquina: {e}")
+        st.error(f"Error durante la eliminación de la máquina: {e}")
         conexion.rollback()
-    
+
     finally:
-        cursor.close()
         conexion.close()
+
 def ejecutar_sql_comando(comando):
     conexion = conectar_db()
     cursor = conexion.cursor()
