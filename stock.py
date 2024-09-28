@@ -213,17 +213,12 @@ def ejecutar_sql_comando(comando):
 
 
 # Función para registrar una entrada de stock
-def registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad):
+def registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad, nombre_repuesto=None, descripcion_repuesto=None, ubicacion_repuesto=None):
     conexion = conectar_db()
     cursor = conexion.cursor()
 
     # Verificar si se seleccionó "Nuevo Repuesto"
     if repuesto_seleccionado == "Nuevo Repuesto":
-        # Solicitar los detalles del nuevo repuesto
-        nombre_repuesto = st.text_input("Nombre del nuevo repuesto")
-        descripcion_repuesto = st.text_input("Descripción del nuevo repuesto")
-        ubicacion_repuesto = st.text_input("Ubicación del nuevo repuesto")
-
         # Verificar si el repuesto ya existe en la misma máquina
         cursor.execute('''
             SELECT id FROM repuesto 
@@ -458,7 +453,7 @@ def interfaz_principal():
 
     if opcion == "Registrar Entrada":
         st.header("Registrar Entrada de Stock")
-
+    
         # Obtener lista de hospitales
         hospitales = obtener_hospitales()
         hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
@@ -478,8 +473,23 @@ def interfaz_principal():
         # Ingresar la cantidad para registrar
         cantidad = st.number_input("Cantidad a ingresar", min_value=1, step=1)
     
-        if st.button(f"Registrar entrada"):
-            registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad)
+        # Si se selecciona "Nuevo Repuesto", mostrar campos adicionales para el nuevo repuesto
+        if repuesto_seleccionado == "Nuevo Repuesto":
+            nombre_repuesto = st.text_input("Nombre del nuevo repuesto")
+            descripcion_repuesto = st.text_input("Descripción del nuevo repuesto")
+            ubicacion_repuesto = st.text_input("Ubicación del nuevo repuesto")
+    
+            # Validar que los campos no estén vacíos
+            if nombre_repuesto and descripcion_repuesto and ubicacion_repuesto:
+                if st.button("Registrar nuevo repuesto y entrada"):
+                    registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad, nombre_repuesto, descripcion_repuesto, ubicacion_repuesto)
+            else:
+                st.warning("Por favor, completa todos los campos para el nuevo repuesto.")
+        else:
+            # Si no se selecciona "Nuevo Repuesto", registrar entrada para un repuesto existente
+            if st.button("Registrar entrada"):
+                registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad)
+
         
     elif opcion == "Registrar Salida":
         st.header("Registrar Salida de Stock")
