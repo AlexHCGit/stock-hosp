@@ -409,11 +409,11 @@ def interfaz_principal():
 
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Ver Stock", "Buscar Repuesto", "Registrar Entrada", "Registrar Salida", 
-                                                            "Ver Repuestos", "Ver Hospitales", "Agregar Hospital", 
-                                                            "Ver Maquinas", "Agregar Máquina",  
+                                                             "Ver Hospitales", "Agregar Hospital", 
+                                                             "Agregar Máquina",  
                                                              "Ver Máquinas por Hospital", 
                                                              "Eliminar Repuesto", 
-                                                            "Eliminar Máquina", "Eliminar Hospital", "Eliminar Máquina Manual", "Eliminar Repuesto Manual"])
+                                                            "Eliminar Máquina", "Eliminar Hospital"])
                                                             
 
     if opcion == "Registrar Entrada":
