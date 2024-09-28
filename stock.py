@@ -328,7 +328,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
 
     # Consulta SQL para obtener el stock de los repuestos
     query = '''
-        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, repuesto.ubicacion, maquina.nombre, hospital.nombre
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.stock, repuesto.ubicacion,
         FROM repuesto
         JOIN maquina ON repuesto.maquina_id = maquina.id
         JOIN hospital ON maquina.hospital_id = hospital.id
@@ -349,7 +349,7 @@ def ver_stock(hospital_id=None, maquina_id=None):
     conexion.close()
 
     # Convertir los resultados en un dataframe de Pandas
-    df_repuestos = pd.DataFrame(repuestos, columns=['Nombre Repuesto', 'Descripción', 'Stock', 'Ubicación', 'Máquina', 'Hospital'])
+    df_repuestos = pd.DataFrame(repuestos, columns=['Nombre Repuesto', 'Descripción', 'Stock', 'Ubicación'])
 
     if not df_repuestos.empty:
         # Mostrar el dataframe en la interfaz de usuario
