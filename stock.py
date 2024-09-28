@@ -505,9 +505,17 @@ def interfaz_principal():
                 st.warning(f"Estás a punto de eliminar la máquina '{maquina_seleccionada[1]}' y todos sus repuestos. Confirma la eliminación.")
                 
                 if st.button(f"Confirmar eliminación de la máquina '{maquina_seleccionada[1]}'"):
-                    st.write(f"Iniciando la eliminación de la máquina con ID {maquina_id}")
-                    eliminar_maquina(maquina_id)
-                    st.success(f"Máquina '{maquina_seleccionada[1]}' eliminada correctamente junto con todos sus repuestos.")
+                    st.write(f"Confirmación recibida: Eliminando la máquina con ID {maquina_id}")  # Confirmación antes de eliminar
+                
+                    # Aquí llamamos a la función eliminar_maquina
+                    try:
+                        eliminar_maquina(maquina_id)
+                        st.success(f"Máquina '{maquina_seleccionada[1]}' eliminada correctamente junto con todos sus repuestos.")
+                        st.write("Máquina eliminada correctamente.")  # Confirmación de éxito
+                    except Exception as e:
+                        st.error(f"Error al eliminar la máquina: {e}")  # Mostrar error en caso de fallo
+                        st.write(f"Error al ejecutar la eliminación: {e}")  # Mostrar el error específico
+
 
                     # Refrescar la lista de máquinas después de la eliminación
                     maquinas_actualizadas = obtener_maquinas(hospital_id)
