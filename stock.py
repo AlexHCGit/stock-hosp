@@ -483,67 +483,67 @@ def interfaz_principal():
 
     
     elif opcion == "Eliminar Máquina":
-    st.header("Eliminar Máquina")
-    
-    # Obtener lista de hospitales
-    hospitales = obtener_hospitales()
-    st.write(f"Hospitales disponibles: {hospitales}")  # Para depurar la lista de hospitales
-
-    hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
-    st.write(f"Hospital seleccionado: {hospital_id}")  # Para verificar el hospital seleccionado
-    
-    # Obtener las máquinas asociadas al hospital seleccionado
-    maquinas = obtener_maquinas(hospital_id)
-    st.write(f"Máquinas disponibles en el hospital {hospital_id}: {maquinas}")  # Para depurar la lista de máquinas
-    
-    if maquinas:
-        # Mostrar menú desplegable de máquinas con nombre y ID
-        maquina_seleccionada = st.selectbox("Selecciona una Máquina para eliminar", maquinas, format_func=lambda x: f"ID: {x[0]} | Máquina: {x[1]}")
-        st.write(f"Máquina seleccionada: {maquina_seleccionada}")  # Verificar la máquina seleccionada
+        st.header("Eliminar Máquina")
         
-        # Extraer el ID de la máquina seleccionada
-        maquina_id = maquina_seleccionada[0]
-        st.write(f"ID de la máquina seleccionada: {maquina_id}")  # Verificar el ID de la máquina
-
-        # Verificar si se ha confirmado la eliminación
-        if "confirmar_eliminacion" not in st.session_state:
-            st.session_state.confirmar_eliminacion = False
-
-        # Primer botón: iniciar la confirmación de eliminación
-        if st.button(f"Eliminar Máquina '{maquina_seleccionada[1]}'"):
-            st.warning(f"Estás a punto de eliminar la máquina '{maquina_seleccionada[1]}' y todos sus repuestos. Confirma la eliminación.")
-            st.session_state.confirmar_eliminacion = True  # Cambiar estado para confirmar la eliminación
-
-        # Segundo botón: realizar la eliminación si la confirmación está activada
-        if st.session_state.confirmar_eliminacion:
-            if st.button(f"Confirmar eliminación de la máquina '{maquina_seleccionada[1]}'"):
-                st.write(f"Confirmación recibida: Eliminando la máquina con ID {maquina_id}")  # Confirmación antes de eliminar
-                
-                # Aquí llamamos a la función eliminar_maquina
-                try:
-                    eliminar_maquina(maquina_id)
-                    st.success(f"Máquina '{maquina_seleccionada[1]}' eliminada correctamente junto con todos sus repuestos.")
-                    st.write("Máquina eliminada correctamente.")  # Confirmación de éxito
-                except Exception as e:
-                    st.error(f"Error al eliminar la máquina: {e}")  # Mostrar error en caso de fallo
-                    st.write(f"Error al ejecutar la eliminación: {e}")  # Mostrar el error específico
-
-                # Refrescar la lista de máquinas después de la eliminación
-                maquinas_actualizadas = obtener_maquinas(hospital_id)
-                st.write(f"Máquinas actualizadas en el hospital {hospital_id}: {maquinas_actualizadas}")  # Para depurar después de la eliminación
-
-                if not maquinas_actualizadas:
-                    st.info(f"No quedan máquinas en el hospital seleccionado.")
-                else:
-                    st.write("Máquinas restantes:")
-                    for maquina in maquinas_actualizadas:
-                        st.write(f"Máquina: {maquina[1]}")
-
-            # Resetear el estado de confirmación después de eliminar
-            st.session_state.confirmar_eliminacion = False
-
-    else:
-        st.info("No hay máquinas disponibles para eliminar en este hospital.")
+        # Obtener lista de hospitales
+        hospitales = obtener_hospitales()
+        st.write(f"Hospitales disponibles: {hospitales}")  # Para depurar la lista de hospitales
+    
+        hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+        st.write(f"Hospital seleccionado: {hospital_id}")  # Para verificar el hospital seleccionado
+        
+        # Obtener las máquinas asociadas al hospital seleccionado
+        maquinas = obtener_maquinas(hospital_id)
+        st.write(f"Máquinas disponibles en el hospital {hospital_id}: {maquinas}")  # Para depurar la lista de máquinas
+        
+        if maquinas:
+            # Mostrar menú desplegable de máquinas con nombre y ID
+            maquina_seleccionada = st.selectbox("Selecciona una Máquina para eliminar", maquinas, format_func=lambda x: f"ID: {x[0]} | Máquina: {x[1]}")
+            st.write(f"Máquina seleccionada: {maquina_seleccionada}")  # Verificar la máquina seleccionada
+            
+            # Extraer el ID de la máquina seleccionada
+            maquina_id = maquina_seleccionada[0]
+            st.write(f"ID de la máquina seleccionada: {maquina_id}")  # Verificar el ID de la máquina
+    
+            # Verificar si se ha confirmado la eliminación
+            if "confirmar_eliminacion" not in st.session_state:
+                st.session_state.confirmar_eliminacion = False
+    
+            # Primer botón: iniciar la confirmación de eliminación
+            if st.button(f"Eliminar Máquina '{maquina_seleccionada[1]}'"):
+                st.warning(f"Estás a punto de eliminar la máquina '{maquina_seleccionada[1]}' y todos sus repuestos. Confirma la eliminación.")
+                st.session_state.confirmar_eliminacion = True  # Cambiar estado para confirmar la eliminación
+    
+            # Segundo botón: realizar la eliminación si la confirmación está activada
+            if st.session_state.confirmar_eliminacion:
+                if st.button(f"Confirmar eliminación de la máquina '{maquina_seleccionada[1]}'"):
+                    st.write(f"Confirmación recibida: Eliminando la máquina con ID {maquina_id}")  # Confirmación antes de eliminar
+                    
+                    # Aquí llamamos a la función eliminar_maquina
+                    try:
+                        eliminar_maquina(maquina_id)
+                        st.success(f"Máquina '{maquina_seleccionada[1]}' eliminada correctamente junto con todos sus repuestos.")
+                        st.write("Máquina eliminada correctamente.")  # Confirmación de éxito
+                    except Exception as e:
+                        st.error(f"Error al eliminar la máquina: {e}")  # Mostrar error en caso de fallo
+                        st.write(f"Error al ejecutar la eliminación: {e}")  # Mostrar el error específico
+    
+                    # Refrescar la lista de máquinas después de la eliminación
+                    maquinas_actualizadas = obtener_maquinas(hospital_id)
+                    st.write(f"Máquinas actualizadas en el hospital {hospital_id}: {maquinas_actualizadas}")  # Para depurar después de la eliminación
+    
+                    if not maquinas_actualizadas:
+                        st.info(f"No quedan máquinas en el hospital seleccionado.")
+                    else:
+                        st.write("Máquinas restantes:")
+                        for maquina in maquinas_actualizadas:
+                            st.write(f"Máquina: {maquina[1]}")
+    
+                # Resetear el estado de confirmación después de eliminar
+                st.session_state.confirmar_eliminacion = False
+    
+        else:
+            st.info("No hay máquinas disponibles para eliminar en este hospital.")
 
 
 
