@@ -755,20 +755,20 @@ def interfaz_principal():
             st.info("No hay máquinas disponibles para eliminar en este hospital.")
 
     elif opcion == "Ver Stock":
-    st.header("Ver Stock de Repuestos")
+        st.header("Ver Stock de Repuestos")
+        
+        # Seleccionar hospital y máquina
+        hospitales = obtener_hospitales()
+        hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
     
-    # Seleccionar hospital y máquina
-    hospitales = obtener_hospitales()
-    hospital_id = st.selectbox("Selecciona un Hospital", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
-
-    maquinas = obtener_maquinas(hospital_id)
-    maquina_id = st.selectbox("Selecciona una Máquina", [m[0] for m in maquinas], format_func=lambda x: dict((m[0], m[1]) for m in maquinas)[x])
-    
-    # Mostrar el stock en formato dataframe
-    if hospital_id and maquina_id:
-        ver_stock(hospital_id, maquina_id)
-    else:
-        st.info("Selecciona un hospital y una máquina para ver el stock.")
+        maquinas = obtener_maquinas(hospital_id)
+        maquina_id = st.selectbox("Selecciona una Máquina", [m[0] for m in maquinas], format_func=lambda x: dict((m[0], m[1]) for m in maquinas)[x])
+        
+        # Mostrar el stock en formato dataframe
+        if hospital_id and maquina_id:
+            ver_stock(hospital_id, maquina_id)
+        else:
+            st.info("Selecciona un hospital y una máquina para ver el stock.")
 
 
     elif opcion == "Agregar Hospital":
