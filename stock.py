@@ -692,8 +692,8 @@ def interfaz_principal():
             st.info("No hay repuestos disponibles para esta máquina.")
 
     elif opcion == "Ver Movimientos":
-    st.header("Ver Movimientos de Stock")
-    ver_movimientos()
+        st.header("Ver Movimientos de Stock")
+        ver_movimientos()
 
 
     
