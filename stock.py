@@ -621,7 +621,10 @@ def interfaz_principal():
     
     elif opcion == "Cargar repuestos desde Excel":
         st.header("Cargar Repuestos desde un archivo Excel")
-    
+
+        # Mostrar mensaje informativo
+        st.info("Por favor, asegúrate de que el archivo Excel contiene como mínimo las siguientes columnas: 'partnumber', 'descripcion', 'ubicacion' y 'stock'.")
+            
         # Subir el archivo Excel
         archivo_excel = st.file_uploader("Sube un archivo Excel", type=["xlsx"])
     
