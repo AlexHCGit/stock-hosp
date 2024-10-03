@@ -66,70 +66,53 @@ def crear_tablas():
     conexion.close()
 
 # Función para cargar los repuestos desde excel
-def cargar_repuestos_desde_excel(archivo, maquina_id):
+def cargar_repuestos_desde_excel(df, maquina_id):
+    # Definir las columnas requeridas
+    columnas_requeridas = ['partnumber', 'descripcion', 'stock', 'ubicacion']
+
+    # Mantener solo las columnas requeridas y eliminar filas con valores NaN en la columna 'nombre'
+    df = df[columnas_requeridas].dropna(subset=['partnumber'])
+
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
     try:
-        df = pd.read_excel(archivo)
-
-        # Verificar si las columnas requeridas existen
-        columnas_requeridas = ['partnumber', 'descripcion', 'ubicacion', 'stock']
-        if not all(col in df.columns for col in columnas_requeridas):
-            st.error("El archivo Excel no contiene las columnas requeridas: 'partnumber', 'descripcion', 'ubicacion', 'stock'.")
-            return
-
-        # Mantener solo las columnas requeridas y eliminar filas con valores NaN en la columna 'partnumber'
-        df = df[columnas_requeridas].dropna(subset=['partnumber'])
-        
-        # Insertar datos en la base de datos
-        conexion = conectar_db()
-        cursor = conexion.cursor()
-        
         for index, row in df.iterrows():
-            try:
-                # Convertir partnumber a string para evitar problemas de tipo
-                nombre = str(row['partnumber'])
-                descripcion = row['descripcion'] if pd.notna(row['descripcion']) else ""  # Manejar NaN como cadenas vacías
-                stock = row['stock'] if pd.notna(row['stock']) else 0  # Manejar NaN como 0
-                ubicacion = row['ubicacion'] if pd.notna(row['ubicacion']) else ""  # Manejar NaN como cadenas vacías
-                
-                # Imprimir los valores que estamos intentando insertar
-                print(f"Procesando repuesto: {nombre}, Stock: {stock}, Descripción: {descripcion}, Ubicación: {ubicacion}")
+            nombre = str(row['partnumber'])
+            descripcion = row['descripcion'] if pd.notna(row['descripcion']) else ""  # Manejar NaN como cadenas vacías
+            stock = row['stock'] if pd.notna(row['stock']) else 0  # Manejar NaN como 0
+            ubicacion = row['ubicacion'] if pd.notna(row['ubicacion']) else ""  # Manejar NaN como cadenas vacías
 
-                # Verificar si el repuesto ya existe en la misma máquina
+            # Verificar si el repuesto ya existe en la misma máquina
+            cursor.execute('''
+                SELECT id FROM repuesto 
+                WHERE nombre = %s AND maquina_id = %s
+            ''', (nombre, maquina_id))
+            repuesto_existente = cursor.fetchone()
+
+            if repuesto_existente:
+                # Si el repuesto ya existe, actualizar el stock
+                repuesto_id = repuesto_existente[0]
                 cursor.execute('''
-                    SELECT id FROM repuestos 
-                    WHERE nombre = ? AND maquina_id = ?
-                ''', (nombre, maquina_id))
-                repuesto_existente = cursor.fetchone()
+                    UPDATE repuesto SET stock = stock + %s, descripcion = %s, ubicacion = %s WHERE id = %s
+                ''', (stock, descripcion, ubicacion, repuesto_id))
+                st.info(f"Repuesto '{nombre}' ya existe. Stock actualizado.")
+            else:
+                # Si no existe, insertar un nuevo repuesto
+                cursor.execute('''
+                    INSERT INTO repuesto (nombre, descripcion, stock, ubicacion, maquina_id) 
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', (nombre, descripcion, stock, ubicacion, maquina_id))
+                st.success(f"Repuesto '{nombre}' añadido correctamente.")
 
-                if repuesto_existente:
-                    # Si el repuesto ya existe, actualizar el stock
-                    repuesto_id = repuesto_existente[0]
-                    cursor.execute('''
-                        UPDATE repuestos SET stock = stock + ?, descripcion = ?, ubicacion = ? WHERE id = ?
-                    ''', (stock, descripcion, ubicacion, repuesto_id))
-                    print(f"Repuesto '{nombre}' ya existe. Stock actualizado.")
-                else:
-                    # Si no existe, insertar un nuevo repuesto
-                    cursor.execute('''
-                        INSERT INTO repuestos (nombre, descripcion, stock, ubicacion, maquina_id) 
-                        VALUES (?, ?, ?, ?, ?)
-                    ''', (nombre, descripcion, stock, ubicacion, maquina_id))
-                    print(f"Repuesto '{nombre}' añadido correctamente.")
-                
-                # Confirmar cambios después de cada operación
-                conexion.commit()
-
-            except Exception as e:
-                # Registrar cualquier error específico para este repuesto
-                print(f"Error al procesar el repuesto '{nombre}': {e}")
-                conexion.rollback()  # Revertir la transacción en caso de error
+        # Confirmar los cambios en la base de datos
+        conexion.commit()
 
     except Exception as e:
+        conexion.rollback()
         st.error(f"Error al cargar los repuestos: {e}")
     finally:
-        # Cerrar la conexión a la base de datos
-        if conexion:
-            conexion.close()
+        conexion.close()
 
 
 
