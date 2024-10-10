@@ -899,7 +899,7 @@ def interfaz_principal():
                 nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
     
                 # Lista de zonas predefinidas
-                zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+                zonas_disponibles = ["Cataluña", "Levante"] #, "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
     
                 # Si la zona es None, asignar un valor predeterminado
                 zona_actual = hospital_data[2] if hospital_data[2] in zonas_disponibles else zonas_disponibles[0]
