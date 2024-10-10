@@ -11,7 +11,22 @@ def conectar_db():
     # Establecer la conexión usando psycopg2
     conexion = psycopg2.connect(DATABASE_URL)
     return conexion
-    
+
+def agregar_columna_zona():
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+
+    # Agregar la columna zona a la tabla hospital si no existe
+    cursor.execute('''
+    ALTER TABLE hospital
+    ADD COLUMN IF NOT EXISTS zona TEXT;
+    ''')
+
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+
+
 # Crear tablas si no existen
 def crear_tablas():
     conexion = conectar_db()
@@ -157,7 +172,7 @@ def agregar_hospital(nombre, ubicacion):
     else:
         conexion = conectar_db()
         cursor = conexion.cursor()
-        cursor.execute('INSERT INTO hospital (nombre, ubicacion) VALUES (%s, %s)', (nombre, ubicacion))
+        cursor.execute('INSERT INTO hospital (nombre, ubicacion, zona) VALUES (%s, %s, %s)', (nombre, ubicacion, zona))
         conexion.commit()
         conexion.close()
         st.success(f"Hospital '{nombre}' agregado correctamente en la ubicación '{ubicacion}'.")
@@ -422,6 +437,21 @@ def listar_repuestos():
     conexion.close()
     return repuestos
 
+# Modificar la función de búsqueda de repuestos para incluir la zona
+def buscar_repuesto_zona(nombre_repuesto, zona):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    cursor.execute('''
+        SELECT repuesto.nombre, repuesto.descripcion, repuesto.ubicacion, repuesto.stock, maquina.nombre, hospital.nombre
+        FROM repuesto
+        JOIN maquina ON repuesto.maquina_id = maquina.id
+        JOIN hospital ON maquina.hospital_id = hospital.id
+        WHERE repuesto.nombre LIKE %s AND hospital.zona = %s
+    ''', ('%' + nombre_repuesto + '%', zona))
+    resultados = cursor.fetchall()
+    conexion.close()
+    return resultados
+
 
 # Función para listar todos los hospitales
 def listar_hospitales():
@@ -566,10 +596,26 @@ def ver_movimientos():
     else:
         st.info("No hay movimientos de stock disponibles para mostrar.")
 
+# Función para actualizar un hospital existente
+def actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona):
+    conexion = conectar_db()
+    cursor = conexion.cursor()
+    cursor.execute('''
+        UPDATE hospital 
+        SET nombre = %s, ubicacion = %s, zona = %s 
+        WHERE id = %s
+    ''', (nuevo_nombre, nueva_ubicacion, nueva_zona, hospital_id))
+    conexion.commit()
+    conexion.close()
+    st.success(f"Hospital '{nuevo_nombre}' actualizado correctamente.")
+
+
 
 # Interfaz con Streamlit
 def interfaz_principal():
     st.title("Gestión de Extra-Stock")
+
+    agregar_columna_zona()
 
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Buscar Repuesto", "Ver Stock", "Registrar Entrada", "Registrar Salida", 
@@ -825,9 +871,33 @@ def interfaz_principal():
         st.header("Agregar Hospital")
         nombre = st.text_input("Nombre del Hospital")
         ubicacion = st.text_input("Ubicación del Hospital")
+        zona = st.text_input("Zona del Hospitla")  # Nuevo campo para la zona
         if st.button("Agregar Hospital"):
-            agregar_hospital(nombre, ubicacion)
+            agregar_hospital(nombre, ubicacion, zona)
 
+    elif opcion == "Editar Hospital":
+        st.header("Editar Hospital")
+    
+        hospitales = obtener_hospitales()
+        hospital_seleccionado = st.selectbox("Selecciona un Hospital para editar", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+    
+        if hospital_seleccionado:
+            hospital_id = hospital_seleccionado[0]
+            nombre_actual = hospital_seleccionado[1]
+            ubicacion_actual = hospital_seleccionado[2]
+            
+            # Obtener los datos actuales del hospital
+            cursor.execute('SELECT nombre, ubicacion, zona FROM hospital WHERE id = %s', (hospital_id,))
+            hospital_data = cursor.fetchone()
+    
+            nuevo_nombre = st.text_input("Nuevo Nombre del Hospital", hospital_data[0])
+            nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
+            nueva_zona = st.text_input("Nueva Zona del Hospital", hospital_data[2])
+    
+            if st.button("Actualizar Hospital"):
+                actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona)
+
+    
     elif opcion == "Ver Hospitales":
         st.header("Ver Hospitales")
         ver_hospitales()
@@ -856,15 +926,20 @@ def interfaz_principal():
 
 
     elif opcion == "Buscar Repuesto":
-        st.header("Buscar Repuesto")
+        st.header("Buscar Repuesto por Zona")
+    
+        # Agregar selección de zona
+        zona = st.text_input("Introduce la zona")
         nombre_repuesto = st.text_input("PartNumber del Repuesto")
+        
         if st.button("Buscar"):
-            resultados = buscar_repuesto(nombre_repuesto)
+            resultados = buscar_repuesto_zona(nombre_repuesto, zona)
             if resultados:
                 for resultado in resultados:
                     st.write(f"Repuesto: {resultado[0]} | Descripción: {resultado[1]} | Ubicación: {resultado[2]} | Stock: {resultado[3]} | Máquina: {resultado[4]} | Hospital: {resultado[5]}")
             else:
-                st.warning("No se encontró el repuesto.")
+                st.warning("No se encontró el repuesto en la zona seleccionada.")
+
     elif opcion == "Ver Maquinas":
         st.header("Listado de Máquinas")
         maquinas = listar_maquinas()
