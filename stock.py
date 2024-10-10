@@ -872,7 +872,7 @@ def interfaz_principal():
 
         #Lista fija de las zonas
         zonas_disponibles = ["Cataluña", "Levante"] # "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
-        zona = st.selectbox("Selecciona Zona")  # seleccina la zona
+        zona = st.selectbox("Selecciona Zona", zonas_disponibles)  # seleccina la zona
         if st.button("Agregar Hospital"):
             agregar_hospital(nombre, ubicacion, zona)
 
