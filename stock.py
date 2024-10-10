@@ -166,7 +166,7 @@ def verificar_maquina(nombre, hospital_id):
     return resultado > 0
 
 # Función para agregar un hospital
-def agregar_hospital(nombre, ubicacion):
+def agregar_hospital(nombre, ubicacion, zona):
     if verificar_hospital(nombre, ubicacion):
         st.warning(f"El hospital '{nombre}' ya existe en la ubicación '{ubicacion}'.")
     else:
@@ -175,7 +175,7 @@ def agregar_hospital(nombre, ubicacion):
         cursor.execute('INSERT INTO hospital (nombre, ubicacion, zona) VALUES (%s, %s, %s)', (nombre, ubicacion, zona))
         conexion.commit()
         conexion.close()
-        st.success(f"Hospital '{nombre}' agregado correctamente en la ubicación '{ubicacion}'.")
+        st.success(f"Hospital '{nombre}' agregado correctamente en la ubicación '{ubicacion}' con zona '{zona}'.")
 
 # Función para agregar una máquina a un hospital
 def agregar_maquina(nombre, hospital_id):
@@ -615,8 +615,6 @@ def actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona):
 def interfaz_principal():
     st.title("Gestión de Extra-Stock")
 
-    agregar_columna_zona()
-
     # Pestañas para las diferentes funcionalidades
     opcion = st.sidebar.selectbox("Selecciona una opción", ["Buscar Repuesto", "Ver Stock", "Registrar Entrada", "Registrar Salida", 
                                                             "Cargar repuestos desde Excel", "Ver Hospitales", "Agregar Hospital", 
@@ -871,7 +869,10 @@ def interfaz_principal():
         st.header("Agregar Hospital")
         nombre = st.text_input("Nombre del Hospital")
         ubicacion = st.text_input("Ubicación del Hospital")
-        zona = st.text_input("Zona del Hospitla")  # Nuevo campo para la zona
+
+        #Lista fija de las zonas
+        zonas_disponibles = ["Cataluña", "Levante"] # "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+        zona = st.selectbox("Selecciona Zona")  # seleccina la zona
         if st.button("Agregar Hospital"):
             agregar_hospital(nombre, ubicacion, zona)
 
@@ -892,10 +893,14 @@ def interfaz_principal():
     
             nuevo_nombre = st.text_input("Nuevo Nombre del Hospital", hospital_data[0])
             nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
-            nueva_zona = st.text_input("Nueva Zona del Hospital", hospital_data[2])
+    
+            # Selección de zona con lista fija
+            zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+            nueva_zona = st.selectbox("Nueva Zona", zonas_disponibles, index=zonas_disponibles.index(hospital_data[2]))
     
             if st.button("Actualizar Hospital"):
                 actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona)
+
 
     
     elif opcion == "Ver Hospitales":
@@ -928,12 +933,14 @@ def interfaz_principal():
     elif opcion == "Buscar Repuesto":
         st.header("Buscar Repuesto por Zona")
     
-        # Agregar selección de zona
-        zona = st.text_input("Introduce la zona")
+        # Selección de zona
+        zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+        zona_seleccionada = st.selectbox("Selecciona una Zona", zonas_disponibles)
+    
         nombre_repuesto = st.text_input("PartNumber del Repuesto")
         
         if st.button("Buscar"):
-            resultados = buscar_repuesto_zona(nombre_repuesto, zona)
+            resultados = buscar_repuesto_zona(nombre_repuesto, zona_seleccionada)
             if resultados:
                 for resultado in resultados:
                     st.write(f"Repuesto: {resultado[0]} | Descripción: {resultado[1]} | Ubicación: {resultado[2]} | Stock: {resultado[3]} | Máquina: {resultado[4]} | Hospital: {resultado[5]}")
@@ -992,6 +999,8 @@ def interfaz_principal():
 if __name__ == "__main__":
     crear_tablas()  # Crear las tablas la primera vez que se ejecuta
     agregar_columna_ubicacion()  # Agregar la columna 'ubicacion' si no existe
+    agregar_columna_zona()
+    
     interfaz_principal()
     
     
