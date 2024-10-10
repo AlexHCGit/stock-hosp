@@ -879,27 +879,35 @@ def interfaz_principal():
     elif opcion == "Editar Hospital":
         st.header("Editar Hospital")
     
+        # Obtener la lista de hospitales
         hospitales = obtener_hospitales()
-        hospital_seleccionado = st.selectbox("Selecciona un Hospital para editar", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
     
-        if hospital_seleccionado:
-            hospital_id = hospital_seleccionado[0]
-            nombre_actual = hospital_seleccionado[1]
-            ubicacion_actual = hospital_seleccionado[2]
-            
-            # Obtener los datos actuales del hospital
+        # Seleccionar un hospital directamente por su ID
+        hospital_id = st.selectbox("Selecciona un Hospital para editar", [h[0] for h in hospitales], format_func=lambda x: dict((h[0], f"{h[1]} - {h[2]}") for h in hospitales)[x])
+    
+        if hospital_id:
+            # Obtener los datos actuales del hospital seleccionado
+            conexion = conectar_db()
+            cursor = conexion.cursor()
             cursor.execute('SELECT nombre, ubicacion, zona FROM hospital WHERE id = %s', (hospital_id,))
             hospital_data = cursor.fetchone()
+            conexion.close()
     
-            nuevo_nombre = st.text_input("Nuevo Nombre del Hospital", hospital_data[0])
-            nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
+            if hospital_data:
+                # Mostrar los campos para editar los datos del hospital
+                nuevo_nombre = st.text_input("Nuevo Nombre del Hospital", hospital_data[0])
+                nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
     
-            # Selección de zona con lista fija
-            zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
-            nueva_zona = st.selectbox("Nueva Zona", zonas_disponibles, index=zonas_disponibles.index(hospital_data[2]))
+                # Lista de zonas predefinidas
+                zonas_disponibles = ["Cataluña", "Levante"] #, "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+                nueva_zona = st.selectbox("Nueva Zona", zonas_disponibles, index=zonas_disponibles.index(hospital_data[2]))
     
-            if st.button("Actualizar Hospital"):
-                actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona)
+                if st.button("Actualizar Hospital"):
+                    actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona)
+                    st.success(f"Hospital '{nuevo_nombre}' actualizado correctamente.")
+            else:
+                st.error("No se encontraron datos para el hospital seleccionado.")
+
 
 
     
