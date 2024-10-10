@@ -899,18 +899,22 @@ def interfaz_principal():
                 nueva_ubicacion = st.text_input("Nueva Ubicación del Hospital", hospital_data[1])
     
                 # Lista de zonas predefinidas
-                zonas_disponibles = ["Cataluña", "Levante"] #, "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
-                nueva_zona = st.selectbox("Nueva Zona", zonas_disponibles, index=zonas_disponibles.index(hospital_data[2]))
+                zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+    
+                # Si la zona es None, asignar un valor predeterminado
+                zona_actual = hospital_data[2] if hospital_data[2] in zonas_disponibles else zonas_disponibles[0]
+                nueva_zona = st.selectbox("Nueva Zona", zonas_disponibles, index=zonas_disponibles.index(zona_actual))
     
                 if st.button("Actualizar Hospital"):
                     actualizar_hospital(hospital_id, nuevo_nombre, nueva_ubicacion, nueva_zona)
                     st.success(f"Hospital '{nuevo_nombre}' actualizado correctamente.")
             else:
                 st.error("No se encontraron datos para el hospital seleccionado.")
-
-
-
     
+    
+    
+    
+        
     elif opcion == "Ver Hospitales":
         st.header("Ver Hospitales")
         ver_hospitales()
@@ -942,7 +946,7 @@ def interfaz_principal():
         st.header("Buscar Repuesto por Zona")
     
         # Selección de zona
-        zonas_disponibles = ["Cataluña", "Levante", "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
+        zonas_disponibles = ["Cataluña", "Levante"] #, "Baleares", "Norte", "Centro", "Sur", "Canarias", "Portugal"]
         zona_seleccionada = st.selectbox("Selecciona una Zona", zonas_disponibles)
     
         nombre_repuesto = st.text_input("PartNumber del Repuesto")
