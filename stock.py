@@ -280,12 +280,12 @@ def ejecutar_sql_comando(comando):
 
 
 # Función para registrar una entrada de stock
-def registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad, nombre_repuesto=None, descripcion_repuesto=None, ubicacion_repuesto=None):
+def registrar_entrada(hospital_id, maquina_id, repuesto_id, cantidad, nombre_repuesto=None, descripcion_repuesto=None, ubicacion_repuesto=None):
     conexion = conectar_db()
     cursor = conexion.cursor()
 
     # Verificar si se seleccionó "Nuevo Repuesto"
-    if repuesto_seleccionado == "Nuevo Repuesto":
+    if repuesto_id is None:
         # Verificar si el repuesto ya existe en la misma máquina
         cursor.execute('''
             SELECT id FROM repuesto 
@@ -307,7 +307,7 @@ def registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad, 
             st.success(f"Nuevo repuesto '{nombre_repuesto}' creado con éxito y stock actualizado.")
     else:
         # Si no es un nuevo repuesto, es uno existente, simplemente actualizamos el stock
-        cursor.execute('UPDATE repuesto SET stock = stock + %s WHERE id = %s', (cantidad, repuesto_seleccionado))
+        cursor.execute('UPDATE repuesto SET stock = stock + %s WHERE id = %s', (cantidad, repuesto_id))
         st.success("Stock actualizado para el repuesto seleccionado.")
 
     conexion.commit()
@@ -637,11 +637,20 @@ def interfaz_principal():
     
         # Obtener los repuestos asociados a la máquina seleccionada
         repuestos = obtener_repuestos(maquina_id)
+
+        # Crear un diccionario para mapear nombres a IDs
+        repuesto_id_map = {r[1]: r[0] for r in repuestos}
     
         # Agregar "Nuevo Repuesto" como la primera opción
-        repuesto_opciones = ["Nuevo Repuesto"] + [r[1] for r in repuestos]
-        repuesto_seleccionado = st.selectbox("Selecciona un Repuesto o crea uno nuevo", repuesto_opciones)
-    
+        repuesto_nombres = ["Nuevo Repuesto"] + [r[1] for r in repuestos]
+        repuesto_seleccionado_nombre = st.selectbox("Selecciona un Repuesto o crea uno nuevo", repuesto_nombres)
+
+        # Obtener el id del repuesto seleccionado si no es "Nuevo Repuesto"
+        if repuesto_seleccionado_nombre != "Nuevo Repuesto":
+            repuesto_seleccionado_id = repuesto_id_map[repuesto_seleccionado_nombre]
+        else:
+            repuesto_seleccionado_id = None
+            
         # Ingresar la cantidad para registrar
         cantidad = st.number_input("Cantidad a ingresar", min_value=1, step=1)
     
@@ -654,13 +663,13 @@ def interfaz_principal():
             # Validar que los campos no estén vacíos
             if nombre_repuesto and descripcion_repuesto and ubicacion_repuesto:
                 if st.button("Registrar nuevo repuesto y entrada"):
-                    registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad, nombre_repuesto, descripcion_repuesto, ubicacion_repuesto)
+                    registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado_id, cantidad, nombre_repuesto, descripcion_repuesto, ubicacion_repuesto)
             else:
                 st.warning("Por favor, completa todos los campos para el nuevo repuesto.")
         else:
             # Si no se selecciona "Nuevo Repuesto", registrar entrada para un repuesto existente
             if st.button("Registrar entrada"):
-                registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado, cantidad)
+                registrar_entrada(hospital_id, maquina_id, repuesto_seleccionado_id, cantidad)
 
     
     elif opcion == "Cargar repuestos desde Excel":
