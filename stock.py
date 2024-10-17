@@ -655,7 +655,7 @@ def interfaz_principal():
         cantidad = st.number_input("Cantidad a ingresar", min_value=1, step=1)
     
         # Si se selecciona "Nuevo Repuesto", mostrar campos adicionales para el nuevo repuesto
-        if repuesto_seleccionado == "Nuevo Repuesto":
+        if repuesto_seleccionado_nombre == "Nuevo Repuesto":
             nombre_repuesto = st.text_input("PartNumber del nuevo repuesto")
             descripcion_repuesto = st.text_input("Descripción del nuevo repuesto")
             ubicacion_repuesto = st.text_input("Ubicación del nuevo repuesto")
