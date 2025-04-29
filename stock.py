@@ -963,8 +963,11 @@ def interfaz_principal():
         if st.button("Buscar"):
             resultados = buscar_repuesto_zona(nombre_repuesto, zona_seleccionada)
             if resultados:
-                for resultado in resultados:
-                    st.write(f"Repuesto: {resultado[0]} | Descripción: {resultado[1]} | Ubicación: {resultado[2]} | Stock: {resultado[3]} | Máquina: {resultado[4]} | Hospital: {resultado[5]}")
+                # Convertir los resultados en un DataFrame
+                df_resultados = pd.DataFrame(resultados, columns=['PartNumber', 'Descripción', 'Ubicación', 'Stock', 'Máquina', 'Hospital'])
+    
+                # Mostrar el DataFrame como una tabla
+                st.dataframe(df_resultados)
             else:
                 st.warning("No se encontró el repuesto en la zona seleccionada.")
 
